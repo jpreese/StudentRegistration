@@ -1,0 +1,108 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Student Registration</title>
+    <link rel="stylesheet" href="https://bootswatch.com/flatly/bootstrap.min.css">
+</head>
+<body>
+
+    <div class="navbar navbar-default">
+        <div class="container">
+            <div class="navbar-header">
+                <a href="" class="navbar-brand">Student Registration</a>
+                <button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#navbar-main">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+            </div>
+            <div class="navbar-collapse collapse" id="navbar-main">
+                <ul class="nav navbar-nav">
+                    <li>
+                        <a href="">View Students</a>
+                    </li>
+                </ul>
+
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="http://www.github.com" target="_blank">fork on github</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+
+            <!-- registration form -->
+            <div class="col-lg-7">
+                <form class="form-horizontal">
+                    <fieldset>
+                        <div class="form-group">
+                            <label for="inputUMID" class="col-lg-2 control-label">UMID</label>
+                            <div class="col-lg-10">
+                                <input type="text" class="form-control" id="inputUMID" maxlength="8" pattern="[0-9]{8}" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputFirstName" class="col-lg-2 control-label">First Name</label>
+                            <div class="col-lg-10">
+                                <input type="text" class="form-control" id="inputFirstName" pattern="[a-zA-Z]" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputLastName" class="col-lg-2 control-label">Last Name</label>
+                            <div class="col-lg-10">
+                                <input type="text" class="form-control" id="inputLastName" pattern="[a-zA-Z]" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputProjectTitle" class="col-lg-2 control-label">Project Title</label>
+                            <div class="col-lg-10">
+                                <input type="text" class="form-control" id="inputProjectTitle" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputEmail" class="col-lg-2 control-label">Email</label>
+                            <div class="col-lg-10">
+                                <input type="text" class="form-control" id="inputEmail" pattern="[a-z0-9]+@([a-z0-9]+)(.[a-z0-9])+." required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputPhone" class="col-lg-2 control-label">Phone</label>
+                            <div class="col-lg-10">
+                                <input type="text" class="form-control" id="inputPhone" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="select" class="col-lg-2 control-label">Time Slot</label>
+                            <div class="col-lg-10">
+                                <select class="form-control" id="select">
+                                    <option>1</option>
+                                    <option>2</option>
+                                    <option>3</option>
+                                    <option>4</option>
+                                    <option>5</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-lg-10 col-lg-offset-2">
+                                <button type="reset" class="btn btn-default">Cancel</button>
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                            </div>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+
+            <!-- availability -->
+
+
+        </div>
+    </div>
+
+</body>
+</html>
