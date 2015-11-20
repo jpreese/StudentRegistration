@@ -3,6 +3,9 @@
 // setup server and client error reporting
 error_reporting(E_ERROR | E_WARNING | E_PARSE);
 
+// max student capacity per group
+define("MAX_STUDENT_CAPACITY", 6);
+
 class Student
 {
 	public $umid;
@@ -65,6 +68,64 @@ function print_error_if_exists($error)
 	}
 }
 
+function render_timeslot_dropdown_options($selected)
+{
+	$query = "SELECT * FROM timeslots";
+	$rslt = mysql_query($query);
+	
+	while($row = mysql_fetch_array($rslt))
+	{
+		if(get_spots_remaining($row['timeslotid']) != 0)
+		{
+			if($row['timeslotid'] == $selected)
+			{
+				echo "<option value=\"" . $row['timeslotid'] . "\" selected>" . $row['start_time'] . " - " . $row['end_time'] . "</option>";
+			}
+			else
+			{
+				echo "<option value=\"" . $row['timeslotid'] . "\">" . $row['start_time'] . " - " . $row['end_time'] . "</option>";
+			}
+		}
+	}
+}
+
+function render_availability_table_rows()
+{
+	$query = "SELECT * FROM timeslots";
+	$rslt = mysql_query($query);
+	
+	while($row = mysql_fetch_array($rslt))
+	{
+		$spotsRemaining = get_spots_remaining($row['timeslotid']);
+		
+		$rowClass = $spotsRemaining == 0 ? "danger" : "";
+		
+		echo "<tr class='$rowClass'>";
+		echo "<td>" . $row['timeslotid'] . "</td>";
+		echo "<td>" . $row['start_time'] . " - " . $row['end_time'] . "</td>";
+		echo "<td>" . $spotsRemaining . "</td>";
+		echo "</tr>";
+	}
+}
+
+function render_confirm_message()
+{
+	echo "<div class='form-group'>";
+	echo "<label for='confirmUpdate' class='col-lg-2 control-label'>Confirm</label>";
+	echo "<div class='col-lg-10'>";
+	echo "<input type='checkbox' name='confirmUpdate'> <span class='text-danger'>You have already registered. Update information?</span>";
+	echo "</div>";
+	echo "</div>";
+}
+
+function get_spots_remaining($id)
+{
+	$query = "SELECT * FROM students WHERE timeslotid = '$id'";
+	$rslt = mysql_query($query);
+	
+	return MAX_STUDENT_CAPACITY - mysql_num_rows($rslt);
+}
+
 // establish database connection
 $conn = mysql_connect("localhost", "root", "");
 mysql_select_db("main", $conn);
@@ -82,6 +143,7 @@ if(isset($_POST['submit']))
     
     // assume no errors by default
     $error = false;
+	$confirm = false;
 
 	// validate umid
 	$pattern = "/^[0-9]{8}$/";
@@ -136,9 +198,20 @@ if(isset($_POST['submit']))
 		$student->update_student_info();
 	}
 	
+	// update timeslot
 	if($student->student_already_signed_up() == false)
 	{
 		$student->signup_for_timeslot($timeslotid);
+	}
+	else
+	{
+		$confirm = true;
+	}
+	
+	// previously submitted form and potentially clicked confirm
+	if(isset($_POST['confirmUpdate']))
+	{
+		//
 	}
 }
 
@@ -183,59 +256,54 @@ if(isset($_POST['submit']))
         <div class="row">
 
             <!-- registration form -->
-            <div class="col-lg-7">
+            <div class="col-lg-6">
                 <form class="form-horizontal" method="post" action="index.php">
                     <fieldset>
                         <div class="form-group">
                             <label for="inputUMID" class="col-lg-2 control-label">UMID</label>
                             <div class="col-lg-10">
-                                <input type="text" class="form-control" name="inputUMID" maxlength="8"><!-- pattern="[0-9]{8}" required> --> <?php print_error_if_exists($umidError) ?>
+                                <input type="text" class="form-control" name="inputUMID" maxlength="8" value="<?=$umid?>"><!-- pattern="[0-9]{8}" required> --> <?php print_error_if_exists($umidError) ?>
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="inputFirstName" class="col-lg-2 control-label">First Name</label>
                             <div class="col-lg-10">
-                                <input type="text" class="form-control" name="inputFirstName"><!-- pattern="[a-zA-Z]" required> --> <?php print_error_if_exists($firstNameError) ?>
+                                <input type="text" class="form-control" name="inputFirstName" value="<?=$firstName?>"><!-- pattern="[a-zA-Z]" required> --> <?php print_error_if_exists($firstNameError) ?>
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="inputLastName" class="col-lg-2 control-label">Last Name</label>
                             <div class="col-lg-10">
-                                <input type="text" class="form-control" name="inputLastName"><!-- pattern="[a-zA-Z]" required> --> <?php print_error_if_exists($lastNameError) ?>
+                                <input type="text" class="form-control" name="inputLastName" value="<?=$lastName?>"><!-- pattern="[a-zA-Z]" required> --> <?php print_error_if_exists($lastNameError) ?>
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="inputProjectName" class="col-lg-2 control-label">Project Name</label>
                             <div class="col-lg-10">
-                                <input type="text" class="form-control" name="inputProjectName"><!-- required> -->
+                                <input type="text" class="form-control" name="inputProjectName" value="<?=$projectName?>"><!-- required> -->
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="inputEmail" class="col-lg-2 control-label">Email</label>
                             <div class="col-lg-10">
-                                <input type="text" class="form-control" name="inputEmail"><!-- pattern="[a-z0-9]+@([a-z0-9]+)(.[a-z0-9])+." required> --> <?php print_error_if_exists($emailError) ?>
+                                <input type="text" class="form-control" name="inputEmail" value="<?=$email?>"><!-- pattern="[a-z0-9]+@([a-z0-9]+)(.[a-z0-9])+." required> --> <?php print_error_if_exists($emailError) ?>
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="inputPhone" class="col-lg-2 control-label">Phone</label>
                             <div class="col-lg-10">
-                                <input type="text" class="form-control" name="inputPhone"><!-- pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required> --> <?php print_error_if_exists($phoneError) ?>
+                                <input type="text" class="form-control" name="inputPhone" value="<?=$phone?>"><!-- pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required> --> <?php print_error_if_exists($phoneError) ?>
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="select" class="col-lg-2 control-label">Time Slot</label>
                             <div class="col-lg-10">
                                 <select class="form-control" name="inputTimeSlot">
-								<?php
-									$query = mysql_query("select * from timeslots");
-									while($row = mysql_fetch_array($query))
-									{
-										echo "<option value=\"" . $row['timeslotid'] . "\">" . $row['start_time'] . " - " . $row['end_time'] . "</option>";
-									}
-								?>
+								<?php render_timeslot_dropdown_options($timeslotid); ?>
                                 </select>
                             </div>
                         </div>
+						<?php if($confirm) { render_confirm_message(); } ?>
                         <div class="form-group">
                             <div class="col-lg-10 col-lg-offset-2">
                                 <button type="reset" class="btn btn-default">Cancel</button>
@@ -245,6 +313,26 @@ if(isset($_POST['submit']))
                     </fieldset>
                 </form>
             </div>
+			
+			<!-- availability -->
+			<div class="col-lg-6">
+				<legend>Availability</legend>
+				
+				<table class="table table-striped table-hover ">
+					<thead>
+						<tr>
+							<th>#</th>
+							<th>Time</th>
+							<th>Spots Remaining</th>
+						</tr>
+					</thead>
+					<tbody>
+						<?php render_availability_table_rows(); ?>
+					</tbody>
+				</table>
+				
+			</div>
+			
         </div>
     </div>
 
