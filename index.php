@@ -2,6 +2,54 @@
 
 // setup server and client error reporting
 error_reporting(E_ERROR | E_WARNING | E_PARSE);
+
+class Student
+{
+	public $umid;
+	public $firstName;
+	public $lastName;
+	public $email;
+	public $phone;
+	public $projectName;
+	
+	public function __construct($umid, $firstName, $lastName, $email, $phone, $projectName)
+	{
+		$this->umid = $umid;
+		$this->firstName = $firstName;
+		$this->lastName = $lastName;
+		$this->email = $email;
+		$this->phone = $phone;
+		$this->projectName = $projectName;
+	}
+	
+	public function student_exists()
+	{
+		$query = "SELECT * FROM students AS S WHERE S.umid = '$this->umid'";
+		$rslt = mysql_query($query);
+		
+		return mysql_num_rows($rslt) > 0;
+	}
+	
+	public function add_student_to_db()
+	{
+		$query = "INSERT students (umid, firstname, lastname, email, phone, projectname) VALUES ('$this->umid', '$this->firstName', '$this->lastName', '$this->email', '$this->phone', '$this->projectName')";
+		$rslt = mysql_query($query);
+	}
+	
+	public function student_already_signed_up($student)
+	{
+		
+		$studentAlreadySignedUpQuery = "SELECT * FROM students AS S JOIN students_timeslots AS ST ON ST.studentid = S.studentid WHERE S.umid = '$umid'";
+		$rslt = mysql_query($studentAlreadySignedUpQuery);
+		
+		// user is already signed up for a timeslot
+		if(mysql_num_rows($rslt) > 0)
+		{
+			return true;
+		}
+	}
+}
+
 function print_error_if_exists($error)
 {
 	if($error)
@@ -20,10 +68,13 @@ if(isset($_POST['submit']))
 	$umid = mysql_real_escape_string($_POST['inputUMID']);
 	$firstName = mysql_real_escape_string($_POST['inputFirstName']);
 	$lastName = mysql_real_escape_string($_POST['inputLastName']);
-	$projectTitle = mysql_real_escape_string($_POST['inputProjectTitle']);
+	$projectName = mysql_real_escape_string($_POST['inputProjectName']);
 	$email = mysql_real_escape_string($_POST['inputEmail']);
 	$phone = mysql_real_escape_string($_POST['inputPhone']);
 	$timeslot = mysql_real_escape_string($_POST['inputTimeSlot']);
+    
+    // assume no errors by default
+    $error = false;
 
 	// validate umid
 	$pattern = "/^[0-9]{8}$/";
@@ -58,6 +109,23 @@ if(isset($_POST['submit']))
 	if(preg_match($pattern, $phone) == false)
 	{
 		$phoneError = true;
+	}
+    
+    if($error)
+    {
+        // stuff
+        return;
+    }
+	
+	$student = new Student($umid, $firstName, $lastName, $email, $phone, $projectName);
+	
+	if($student->student_exists() == false)
+	{
+		$student->add_student_to_db();
+	}
+	else
+	{
+		$student->update_student_info();
 	}
 }
 
@@ -124,9 +192,9 @@ if(isset($_POST['submit']))
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="inputProjectTitle" class="col-lg-2 control-label">Project Title</label>
+                            <label for="inputProjectName" class="col-lg-2 control-label">Project Name</label>
                             <div class="col-lg-10">
-                                <input type="text" class="form-control" name="inputProjectTitle"><!-- required> -->
+                                <input type="text" class="form-control" name="inputProjectName"><!-- required> -->
                             </div>
                         </div>
                         <div class="form-group">
