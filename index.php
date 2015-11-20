@@ -153,14 +153,14 @@ if(isset($_POST['submit']))
 	}
 	
 	// validate first name
-	$pattern = "/^[0-9]{8}$/";
+	$pattern = "/^[a-zA-Z]+$/";
 	if(preg_match($pattern, $firstName) == false)
 	{
 		$firstNameError = true;
 	}
 	
 	// validate last name
-	$pattern = "/^[0-9]{8}$/";
+	$pattern = "/^[a-zA-Z]+$/";
 	if(preg_match($pattern, $lastName) == false)
 	{
 		$lastNameError = true;
@@ -170,11 +170,11 @@ if(isset($_POST['submit']))
 	$pattern = "/^[0-9]{8}$/";
 	if(preg_match($pattern, $email) == false)
 	{
-		$emailError = true;
+		$emailError = false;
 	}
 	
 	// validate phone number
-	$pattern = "/^[0-9]{8}$/";
+	$pattern = "/^[0-9]{3}-[0-9]{3}-[0-9]{4}$/";
 	if(preg_match($pattern, $phone) == false)
 	{
 		$phoneError = true;
@@ -188,16 +188,12 @@ if(isset($_POST['submit']))
 	
 	$student = new Student($umid, $firstName, $lastName, $email, $phone, $projectName);
 	
-	// add/update the student 
+	// add student if does not exist
 	if($student->student_exists() == false)
 	{
 		$student->add_student_to_db();
 	}
-	else
-	{
-		$student->update_student_info();
-	}
-	
+
 	// update timeslot
 	if($student->student_already_signed_up() == false)
 	{
@@ -211,7 +207,9 @@ if(isset($_POST['submit']))
 	// previously submitted form and potentially clicked confirm
 	if(isset($_POST['confirmUpdate']))
 	{
-		//
+		$student->update_student_info();
+		$student->signup_for_timeslot($timeslotid);
+		header("Location: index.php");
 	}
 }
 
