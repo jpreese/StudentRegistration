@@ -36,17 +36,24 @@ class Student
 		$rslt = mysql_query($query);
 	}
 	
-	public function student_already_signed_up($student)
+	public function update_student_info()
 	{
+		$query = "UPDATE students SET firstname = '$this->firstName', lastname = '$this->lastName', email = '$this->email', phone = '$this->phone', projectname = '$this->projectName' WHERE umid = '$this->umid'";
+		$rslt = mysql_query($query);
+	}
+	
+	public function student_already_signed_up()
+	{
+		$query = "SELECT * FROM students AS S WHERE S.umid = '$this->umid' AND S.timeslotid != 0";
+		$rslt = mysql_query($query);
 		
-		$studentAlreadySignedUpQuery = "SELECT * FROM students AS S JOIN students_timeslots AS ST ON ST.studentid = S.studentid WHERE S.umid = '$umid'";
-		$rslt = mysql_query($studentAlreadySignedUpQuery);
-		
-		// user is already signed up for a timeslot
-		if(mysql_num_rows($rslt) > 0)
-		{
-			return true;
-		}
+		return mysql_num_rows($rslt) > 0;
+	}
+	
+	public function signup_for_timeslot($id)
+	{
+		$query = "UPDATE students SET timeslotid = '$id' WHERE umid = '$this->umid'";
+		$rslt = mysql_query($query);
 	}
 }
 
@@ -71,7 +78,7 @@ if(isset($_POST['submit']))
 	$projectName = mysql_real_escape_string($_POST['inputProjectName']);
 	$email = mysql_real_escape_string($_POST['inputEmail']);
 	$phone = mysql_real_escape_string($_POST['inputPhone']);
-	$timeslot = mysql_real_escape_string($_POST['inputTimeSlot']);
+	$timeslotid = mysql_real_escape_string($_POST['inputTimeSlot']);
     
     // assume no errors by default
     $error = false;
@@ -119,6 +126,7 @@ if(isset($_POST['submit']))
 	
 	$student = new Student($umid, $firstName, $lastName, $email, $phone, $projectName);
 	
+	// add/update the student 
 	if($student->student_exists() == false)
 	{
 		$student->add_student_to_db();
@@ -126,6 +134,11 @@ if(isset($_POST['submit']))
 	else
 	{
 		$student->update_student_info();
+	}
+	
+	if($student->student_already_signed_up() == false)
+	{
+		$student->signup_for_timeslot($timeslotid);
 	}
 }
 
@@ -217,7 +230,7 @@ if(isset($_POST['submit']))
 									$query = mysql_query("select * from timeslots");
 									while($row = mysql_fetch_array($query))
 									{
-										echo "<option id=\"" . $row['timeslotid'] . "\">" . $row['start_time'] . " - " . $row['end_time'] . "</option>";
+										echo "<option value=\"" . $row['timeslotid'] . "\">" . $row['start_time'] . " - " . $row['end_time'] . "</option>";
 									}
 								?>
                                 </select>
