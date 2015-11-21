@@ -59,7 +59,7 @@ function get_time_from_id($timeslotid)
 
                 <ul class="nav navbar-nav navbar-right">
                     <li>
-                        <a href="http://www.github.com" target="_blank">fork on github</a>
+                        <a href="https://github.com/jpreese/StudentRegistration" target="_blank">fork on github</a>
                     </li>
                 </ul>
             </div>
