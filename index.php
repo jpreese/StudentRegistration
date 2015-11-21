@@ -120,7 +120,7 @@ if(isset($_POST['submit']))
 	}
 	
 	// validate email
-	$pattern = "/^[a-z0-9]+@((?=[a-zA-Z0-9.]{1,80}$))([a-zA-Z0-9]{1,20})(\.[a-zA-Z0-9]{1,20})+$/";
+	$pattern = "/^[a-zA-Z0-9]+@((?=[a-zA-Z0-9.]{1,80}$))([a-zA-Z0-9]{1,20})(\.[a-zA-Z0-9]{1,20})+$/";
 	if(preg_match($pattern, $email) == false)
 	{
 		$emailError = true;
@@ -195,7 +195,7 @@ if(isset($_POST['submit']))
 
                 <ul class="nav navbar-nav navbar-right">
                     <li>
-                        <a href="http://www.github.com" target="_blank">fork on github</a>
+                        <a href="https://github.com/jpreese/StudentRegistration" target="_blank">fork on github</a>
                     </li>
                 </ul>
             </div>
