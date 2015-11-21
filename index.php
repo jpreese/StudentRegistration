@@ -10,7 +10,7 @@ function print_error_if_exists($error)
 {
 	if($error)
 	{
-		echo "<i>Invalid format.</i>";
+		echo "<span class='text-danger'>Invalid format.</span>";
 	}
 }
 
@@ -92,6 +92,7 @@ if(isset($_POST['submit']))
 	if(preg_match($pattern, $umid) == false)
 	{
 		$umidError = true;
+		$error = true;
 	}
 	
 	// validate first name
@@ -99,6 +100,7 @@ if(isset($_POST['submit']))
 	if(preg_match($pattern, $firstName) == false)
 	{
 		$firstNameError = true;
+		$error = true;
 	}
 	
 	// validate last name
@@ -106,13 +108,23 @@ if(isset($_POST['submit']))
 	if(preg_match($pattern, $lastName) == false)
 	{
 		$lastNameError = true;
+		$error = true;
+	}
+	
+	// validate project name
+	$pattern = "/^[a-zA-Z]+$/";
+	if(preg_match($pattern, $projectName) == false)
+	{
+		$projectNameError = true;
+		$error = true;
 	}
 	
 	// validate email
-	$pattern = "/^[0-9]{8}$/";
+	$pattern = "/^[a-z0-9]+@((?=[a-zA-Z0-9.]{1,80}$))([a-zA-Z0-9]{1,20})(\.[a-zA-Z0-9]{1,20})+$/";
 	if(preg_match($pattern, $email) == false)
 	{
-		$emailError = false;
+		$emailError = true;
+		$error = true;
 	}
 	
 	// validate phone number
@@ -120,38 +132,36 @@ if(isset($_POST['submit']))
 	if(preg_match($pattern, $phone) == false)
 	{
 		$phoneError = true;
+		$error = true;
 	}
     
-    if($error)
+    if($error == false)
     {
-        // stuff
-        return;
-    }
-	
-	$student = new Student($umid, $firstName, $lastName, $email, $phone, $projectName);
-	
-	// add student if does not exist
-	if($student->student_exists() == false)
-	{
-		$student->add_student_to_db();
-	}
+		$student = new Student($umid, $firstName, $lastName, $email, $phone, $projectName);
+		
+		// add student if does not exist
+		if($student->student_exists() == false)
+		{
+			$student->add_student_to_db();
+		}
 
-	// update timeslot
-	if($student->student_already_signed_up() == false)
-	{
-		$student->signup_for_timeslot($timeslotid);
-	}
-	else
-	{
-		$confirm = true;
-	}
-	
-	// previously submitted form and potentially clicked confirm
-	if(isset($_POST['confirmUpdate']))
-	{
-		$student->update_student_info();
-		$student->signup_for_timeslot($timeslotid);
-		header("Location: index.php");
+		// update timeslot
+		if($student->student_already_signed_up() == false)
+		{
+			$student->signup_for_timeslot($timeslotid);
+		}
+		else
+		{
+			$confirm = true;
+		}
+		
+		// previously submitted form and potentially clicked confirm
+		if(isset($_POST['confirmUpdate']))
+		{
+			$student->update_student_info();
+			$student->signup_for_timeslot($timeslotid);
+			header("Location: index.php");
+		}
 	}
 }
 
@@ -202,37 +212,37 @@ if(isset($_POST['submit']))
                         <div class="form-group">
                             <label for="inputUMID" class="col-lg-2 control-label">UMID</label>
                             <div class="col-lg-10">
-                                <input type="text" class="form-control" name="inputUMID" maxlength="8" value="<?=$umid?>"><!-- pattern="[0-9]{8}" required> --> <?php print_error_if_exists($umidError) ?>
+                                <input type="text" class="form-control" name="inputUMID" maxlength="8" value="<?=$umid?>"> <?php print_error_if_exists($umidError) ?>
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="inputFirstName" class="col-lg-2 control-label">First Name</label>
                             <div class="col-lg-10">
-                                <input type="text" class="form-control" name="inputFirstName" value="<?=$firstName?>"><!-- pattern="[a-zA-Z]" required> --> <?php print_error_if_exists($firstNameError) ?>
+                                <input type="text" class="form-control" name="inputFirstName" value="<?=$firstName?>"> <?php print_error_if_exists($firstNameError) ?>
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="inputLastName" class="col-lg-2 control-label">Last Name</label>
                             <div class="col-lg-10">
-                                <input type="text" class="form-control" name="inputLastName" value="<?=$lastName?>"><!-- pattern="[a-zA-Z]" required> --> <?php print_error_if_exists($lastNameError) ?>
+                                <input type="text" class="form-control" name="inputLastName" value="<?=$lastName?>"> <?php print_error_if_exists($lastNameError) ?>
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="inputProjectName" class="col-lg-2 control-label">Project Name</label>
                             <div class="col-lg-10">
-                                <input type="text" class="form-control" name="inputProjectName" value="<?=$projectName?>"><!-- required> -->
+                                <input type="text" class="form-control" name="inputProjectName" value="<?=$projectName?>"> <?php print_error_if_exists($projectNameError) ?>
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="inputEmail" class="col-lg-2 control-label">Email</label>
                             <div class="col-lg-10">
-                                <input type="text" class="form-control" name="inputEmail" value="<?=$email?>"><!-- pattern="[a-z0-9]+@([a-z0-9]+)(.[a-z0-9])+." required> --> <?php print_error_if_exists($emailError) ?>
+                                <input type="text" class="form-control" name="inputEmail" value="<?=$email?>"> <?php print_error_if_exists($emailError) ?>
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="inputPhone" class="col-lg-2 control-label">Phone</label>
                             <div class="col-lg-10">
-                                <input type="text" class="form-control" name="inputPhone" value="<?=$phone?>"><!-- pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required> --> <?php print_error_if_exists($phoneError) ?>
+                                <input type="text" class="form-control" name="inputPhone" value="<?=$phone?>"> <?php print_error_if_exists($phoneError) ?>
                             </div>
                         </div>
                         <div class="form-group">
